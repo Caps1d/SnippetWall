@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -15,7 +16,30 @@ func home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Print("Home endpoint reached")
-	w.Write([]byte("Get request to home endpoint"))
+
+	files := []string{
+		"./ui/html/pages/base.tmpl.html",
+		"./ui/html/pages/home.tmpl.html",
+		"./ui/html/partials/nav.tmpl.html",
+	}
+
+	// go can use ParseFiles to read the template file into a template set
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		log.Print(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+
+	// we use ExecuteTemplate to write the content of the "base" template
+	// from the template set into the response body. We have 4 templates in the template set:
+	// "base", "title", "main", "nav" where "base" invokes the other 3
+	// The last parameter represents any dynamic content
+	// that we would like to pass to the template - will use it later
+	err = ts.ExecuteTemplate(w, "base", nil)
+	if err != nil {
+		log.Print(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
 
 func snippetView(w http.ResponseWriter, r *http.Request) {
@@ -45,19 +69,4 @@ func snippetCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte("Create a new snippet..."))
-}
-
-func main() {
-	// servemux is a router
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetView)
-	mux.HandleFunc("/snippet/create", snippetCreate)
-
-	log.Print("Starting servern on: 4000")
-	err := http.ListenAndServe(":4000", mux)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
