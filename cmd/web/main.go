@@ -1,35 +1,56 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"net/http"
+	"os"
 	"path"
 
 	"github.com/Caps1d/Lets-Go/internal/config"
 )
 
+// application struct for dependency injection
+type applicaiton struct {
+	infoLog  *log.Logger
+	errorLog *log.Logger
+}
+
 func main() {
 	// add command line flags
 	// addr := flag.String("addr", ":4000", "HTTP network address")
 	// Below I am storing the flag values in a config struct for convenience
-	var cfg config.Config
-	flag.StringVar(&cfg.Addr, "addr", ":4000", "HTTP network address")
-	flag.StringVar(&cfg.StaticDir, "static-dir", "./ui/static", "Path to static assets")
-	flag.Parse()
+	cfg := config.NewConfig()
 
 	// servemux is a router
 	mux := http.NewServeMux()
 
+	// levelled logging
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	// app struct
+	app := &applicaiton{
+		infoLog:  infoLog,
+		errorLog: errorLog,
+	}
+
 	// added url path sanitation just in case
-	fileServer := http.FileServer(http.Dir(path.Clean("./ui/static/")))
+	fileServer := http.FileServer(http.Dir(path.Clean(cfg.StaticDir)))
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/snippet/view", snippetView)
-	mux.HandleFunc("/snippet/create", snippetCreate)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet/view", app.snippetView)
+	mux.HandleFunc("/snippet/create", app.snippetCreate)
 
-	log.Printf("Starting servern on: %v", cfg.Addr)
-	err := http.ListenAndServe(cfg.Addr, mux)
-	log.Fatal(err)
+	// initialize a new Server struct which containing our config
+	// this is how we hadle errors with errorLog
+	srv := &http.Server{
+		Addr:     cfg.Addr,
+		ErrorLog: errorLog,
+		Handler:  mux,
+	}
+
+	infoLog.Printf("Starting servern on %v", cfg.Addr)
+	err := srv.ListenAndServe()
+	errorLog.Fatal(err)
 }
