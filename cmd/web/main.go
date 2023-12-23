@@ -7,12 +7,14 @@ import (
 	"os"
 
 	"github.com/Caps1d/Lets-Go/internal/config"
-	"github.com/jackc/pgx/v5"
+	"github.com/Caps1d/Lets-Go/internal/models"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // application struct for dependency injection
 type applicaiton struct {
 	cfg      *config.Config
+	snippets *models.SnippetModel
 	infoLog  *log.Logger
 	errorLog *log.Logger
 }
@@ -32,11 +34,12 @@ func main() {
 		errorLog.Fatal(err)
 	}
 	infoLog.Print("DB connection established...")
-	defer db.Close(context.Background())
+	defer db.Close()
 
 	// app struct
 	app := &applicaiton{
 		cfg:      &cfg,
+		snippets: &models.SnippetModel{DB: db},
 		infoLog:  infoLog,
 		errorLog: errorLog,
 	}
@@ -54,9 +57,9 @@ func main() {
 	errorLog.Fatal(err)
 }
 
-func openDB(dsn string) (*pgx.Conn, error) {
+func openDB(dsn string) (*pgxpool.Pool, error) {
 	// db connection
-	conn, err := pgx.Connect(context.Background(), dsn)
+	conn, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		return nil, err
 	}

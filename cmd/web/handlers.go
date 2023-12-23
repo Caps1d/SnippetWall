@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/Caps1d/Lets-Go/internal/models"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -66,6 +68,24 @@ func (app *applicaiton) snippetCreate(w http.ResponseWriter, r *http.Request) {
 		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
+
+	// snippet struct
+	var s models.Snippet
+
+	// decode the requests body into our post struct declared as p
+	if err := json.NewDecoder(r.Body).Decode(&s); err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.infoLog.Printf("Received post: %v", s)
+
+	lastId, err := app.snippets.Insert(s.Title, s.Content, s.ExpiresInt)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+	app.infoLog.Printf("New snippet created with id %d", lastId)
 
 	w.Write([]byte("Create a new snippet..."))
 }
