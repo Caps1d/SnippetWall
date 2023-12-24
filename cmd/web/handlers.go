@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/Caps1d/Lets-Go/internal/models"
-	"html/template"
+	// "html/template"
 	"net/http"
 	"strconv"
+
+	"github.com/Caps1d/Lets-Go/internal/models"
 )
 
 func (app *applicaiton) home(w http.ResponseWriter, r *http.Request) {
@@ -19,27 +21,50 @@ func (app *applicaiton) home(w http.ResponseWriter, r *http.Request) {
 
 	app.infoLog.Println("Home endpoint reached")
 
-	files := []string{
-		"./ui/html/pages/base.tmpl.html",
-		"./ui/html/pages/home.tmpl.html",
-		"./ui/html/partials/nav.tmpl.html",
-	}
+	snippets, err := app.snippets.Latest()
 
-	// go can use ParseFiles to read the template file into a template set
-	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		app.serverError(w, err)
+		return
 	}
 
-	// we use ExecuteTemplate to write the content of the "base" template
-	// from the template set into the response body. We have 4 templates in the template set:
-	// "base", "title", "main", "nav" where "base" invokes the other 3
-	// The last parameter represents any dynamic content
-	// that we would like to pass to the template - will use it later
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		app.serverError(w, err)
+	for _, snippet := range snippets {
+		fmt.Fprintf(w, "%+v\n", snippet)
 	}
+
+	//
+	// files := []string{
+	// 	"./ui/html/pages/base.tmpl.html",
+	// 	"./ui/html/pages/home.tmpl.html",
+	// 	"./ui/html/partials/nav.tmpl.html",
+	// }
+	//
+	// // go can use ParseFiles to read the template file into a template set
+	// ts, err := template.ParseFiles(files...)
+	// if err != nil {
+	// 	app.serverError(w, err)
+	// }
+	//
+	// // we use ExecuteTemplate to write the content of the "base" template
+	// // from the template set into the response body. We have 4 templates in the template set:
+	// // "base", "title", "main", "nav" where "base" invokes the other 3
+	// // The last parameter represents any dynamic content
+	// // that we would like to pass to the template - will use it later
+	// err = ts.ExecuteTemplate(w, "base", nil)
+	// if err != nil {
+	// 	app.serverError(w, err)
+	// }
+
+	// js, err := json.Marshal(snippets)
+	//
+	// if err != nil {
+	// 	app.serverError(w, err)
+	// }
+	//
+	// js = append(js, '\n')
+	//
+	// w.Header().Set("Content-Type", "application/json")
+	// w.Write(js)
 }
 
 func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -52,9 +77,32 @@ func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w)
 		return
 	}
-	// write a formatted string response
+
+	s, err := app.snippets.Get(id)
+
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			app.notFound(w)
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	js, err := json.Marshal(s)
+
+	if err != nil {
+		app.serverError(w, err)
+	}
+
 	app.infoLog.Printf("Displaying snippet with ID %d...", id)
+
+	js = append(js, '\n')
+
 	fmt.Fprintf(w, "Displaying snippet with ID %d...", id)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 
 func (app *applicaiton) snippetCreate(w http.ResponseWriter, r *http.Request) {
