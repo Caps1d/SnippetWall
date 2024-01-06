@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"text/template"
+
 	// "html/template"
 	"net/http"
 	"strconv"
@@ -68,6 +70,7 @@ func (app *applicaiton) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
+
 	// getting url query string parameters
 	// we also want to make sure that the id is an int
 	// we parse the str and convert it to an int
@@ -89,6 +92,26 @@ func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	files := []string{
+		"./ui/html/pages/base.tmpl.html",
+		"./ui/html/partials/nav.tmpl.html",
+		"./ui/html/pages/view.tmpl.html",
+	}
+
+	// Parse the template files...
+	ts, err := template.ParseFiles(files...)
+
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	// And then execute them. Notice how we are passing in the snippet // data (a models.Snippet struct) as the final parameter?
+	err = ts.ExecuteTemplate(w, "base", s)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
 	js, err := json.Marshal(s)
 
 	if err != nil {
@@ -97,7 +120,7 @@ func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
 
 	app.infoLog.Printf("Displaying snippet with ID %d...", id)
 
-	js = append(js, '\n')
+	js = append(js, ' ')
 
 	fmt.Fprintf(w, "Displaying snippet with ID %d...", id)
 
