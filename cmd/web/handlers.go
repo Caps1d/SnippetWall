@@ -30,32 +30,35 @@ func (app *applicaiton) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%+v\n", snippet)
+	// for _, snippet := range snippets {
+	// 	fmt.Fprintf(w, "%+v\n", snippet)
+	// }
+
+	files := []string{
+		"./ui/html/pages/base.tmpl.html",
+		"./ui/html/pages/home.tmpl.html",
+		"./ui/html/partials/nav.tmpl.html",
 	}
 
-	//
-	// files := []string{
-	// 	"./ui/html/pages/base.tmpl.html",
-	// 	"./ui/html/pages/home.tmpl.html",
-	// 	"./ui/html/partials/nav.tmpl.html",
-	// }
-	//
-	// // go can use ParseFiles to read the template file into a template set
-	// ts, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// }
-	//
-	// // we use ExecuteTemplate to write the content of the "base" template
-	// // from the template set into the response body. We have 4 templates in the template set:
-	// // "base", "title", "main", "nav" where "base" invokes the other 3
-	// // The last parameter represents any dynamic content
-	// // that we would like to pass to the template - will use it later
-	// err = ts.ExecuteTemplate(w, "base", nil)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// }
+	// go can use ParseFiles to read the template file into a template set
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	data := templateData{
+		Snippets: snippets,
+	}
+
+	// we use ExecuteTemplate to write the content of the "base" template
+	// from the template set into the response body. We have 4 templates in the template set:
+	// "base", "title", "main", "nav" where "base" invokes the other 3
+	// The last parameter represents any dynamic content
+	// that we would like to pass to the template - will use it later
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
 
 	// js, err := json.Marshal(snippets)
 	//
@@ -106,8 +109,13 @@ func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// And then execute them. Notice how we are passing in the snippet // data (a models.Snippet struct) as the final parameter?
-	err = ts.ExecuteTemplate(w, "base", s)
+	data := templateData{
+		Snippet: s,
+	}
+
+	// And then execute them. Notice how we are passing in the snippet
+	// data (a models.Snippet struct) as the final parameter?
+	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		app.serverError(w, err)
 	}
