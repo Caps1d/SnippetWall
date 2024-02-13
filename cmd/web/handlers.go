@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"text/template"
 
 	// "html/template"
 	"net/http"
@@ -30,46 +29,9 @@ func (app *applicaiton) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// for _, snippet := range snippets {
-	// 	fmt.Fprintf(w, "%+v\n", snippet)
-	// }
-
-	files := []string{
-		"./ui/html/pages/base.tmpl.html",
-		"./ui/html/pages/home.tmpl.html",
-		"./ui/html/partials/nav.tmpl.html",
-	}
-
-	// go can use ParseFiles to read the template file into a template set
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	data := templateData{
+	app.render(w, http.StatusOK, "home.tmpl.html", &templateData{
 		Snippets: snippets,
-	}
-
-	// we use ExecuteTemplate to write the content of the "base" template
-	// from the template set into the response body. We have 4 templates in the template set:
-	// "base", "title", "main", "nav" where "base" invokes the other 3
-	// The last parameter represents any dynamic content
-	// that we would like to pass to the template - will use it later
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	// js, err := json.Marshal(snippets)
-	//
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// }
-	//
-	// js = append(js, '\n')
-	//
-	// w.Header().Set("Content-Type", "application/json")
-	// w.Write(js)
+	})
 }
 
 func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -95,45 +57,31 @@ func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/pages/base.tmpl.html",
-		"./ui/html/partials/nav.tmpl.html",
-		"./ui/html/pages/view.tmpl.html",
-	}
-
-	// Parse the template files...
-	ts, err := template.ParseFiles(files...)
-
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	data := templateData{
+	app.render(w, http.StatusOK, "view.tmpl.html", &templateData{
 		Snippet: s,
-	}
+	})
 
-	// And then execute them. Notice how we are passing in the snippet
-	// data (a models.Snippet struct) as the final parameter?
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-	}
-
-	js, err := json.Marshal(s)
-
-	if err != nil {
-		app.serverError(w, err)
-	}
-
+	// // And then execute them. Notice how we are passing in the snippet
+	// // data (a models.Snippet struct) as the final parameter?
+	// err = ts.ExecuteTemplate(w, "base", data)
+	// if err != nil {
+	// 	app.serverError(w, err)
+	// }
+	//
+	// js, err := json.Marshal(s)
+	//
+	// if err != nil {
+	// 	app.serverError(w, err)
+	// }
+	//
 	app.infoLog.Printf("Displaying snippet with ID %d...", id)
-
-	js = append(js, ' ')
-
+	//
+	// js = append(js, ' ')
+	//
 	fmt.Fprintf(w, "Displaying snippet with ID %d...", id)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	//
+	// w.Header().Set("Content-Type", "application/json")
+	// w.Write(js)
 }
 
 func (app *applicaiton) snippetCreate(w http.ResponseWriter, r *http.Request) {

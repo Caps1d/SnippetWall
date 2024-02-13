@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -13,10 +14,11 @@ import (
 
 // application struct for dependency injection
 type applicaiton struct {
-	cfg      *config.Config
-	snippets *models.SnippetModel
-	infoLog  *log.Logger
-	errorLog *log.Logger
+	cfg           *config.Config
+	snippets      *models.SnippetModel
+	infoLog       *log.Logger
+	errorLog      *log.Logger
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -36,12 +38,18 @@ func main() {
 	infoLog.Print("DB connection established...")
 	defer db.Close()
 
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	// app struct
 	app := &applicaiton{
-		cfg:      &cfg,
-		snippets: &models.SnippetModel{DB: db},
-		infoLog:  infoLog,
-		errorLog: errorLog,
+		cfg:           &cfg,
+		snippets:      &models.SnippetModel{DB: db},
+		infoLog:       infoLog,
+		errorLog:      errorLog,
+		templateCache: templateCache,
 	}
 
 	// initialize a new Server struct which containing our config
