@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	// "html/template"
 	"net/http"
@@ -29,9 +28,10 @@ func (app *applicaiton) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.render(w, http.StatusOK, "home.tmpl.html", &templateData{
-		Snippets: snippets,
-	})
+	data := app.newTemplateData(r)
+	data.Snippets = snippets
+
+	app.render(w, http.StatusOK, "home.tmpl.html", data)
 }
 
 func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -57,31 +57,12 @@ func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.render(w, http.StatusOK, "view.tmpl.html", &templateData{
-		Snippet: s,
-	})
+	data := app.newTemplateData(r)
+	data.Snippet = s
 
-	// // And then execute them. Notice how we are passing in the snippet
-	// // data (a models.Snippet struct) as the final parameter?
-	// err = ts.ExecuteTemplate(w, "base", data)
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// }
-	//
-	// js, err := json.Marshal(s)
-	//
-	// if err != nil {
-	// 	app.serverError(w, err)
-	// }
-	//
+	app.render(w, http.StatusOK, "view.tmpl.html", data)
+
 	app.infoLog.Printf("Displaying snippet with ID %d...", id)
-	//
-	// js = append(js, ' ')
-	//
-	fmt.Fprintf(w, "Displaying snippet with ID %d...", id)
-	//
-	// w.Header().Set("Content-Type", "application/json")
-	// w.Write(js)
 }
 
 func (app *applicaiton) snippetCreate(w http.ResponseWriter, r *http.Request) {

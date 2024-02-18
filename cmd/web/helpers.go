@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"time"
 )
 
 func (app *applicaiton) serverError(w http.ResponseWriter, err error) {
@@ -24,7 +25,9 @@ func (app *applicaiton) notFound(w http.ResponseWriter) {
 }
 
 func (app *applicaiton) render(w http.ResponseWriter, status int, page string, data *templateData) {
-	// Retrieve the appropriate template set from the cache based on the page // name (like 'home.tmpl'). If no entry exists in the cache with the // provided name, then create a new error and call the serverError() helper
+	// Retrieve the appropriate template set from the cache based on the page
+	// name (like 'home.tmpl'). If no entry exists in the cache with the
+	// provided name, then create a new error and call the serverError() helper
 	// method that we made earlier and return.
 	ts, ok := app.templateCache[page]
 	if !ok {
@@ -35,14 +38,24 @@ func (app *applicaiton) render(w http.ResponseWriter, status int, page string, d
 
 	buf := new(bytes.Buffer)
 
-	// Write out the provided HTTP status code ('200 OK', '400 Bad Request' // etc). w.WriteHeader(status)
-	// Execute the template set and write the response body. Again, if there // is any error we call the the serverError() helper. err := ts.ExecuteTemplate(w, "base", data) if err != nil {
+	// Write out the provided HTTP status code ('200 OK', '400 Bad Request', etc)
+	// w.WriteHeader(status)
+	// Execute the template set and write the response body. Again, if there
+	// is any error we call the the serverError() helper
+	// err := ts.ExecuteTemplate(w, "base", data) if err != nil {
 	err := ts.ExecuteTemplate(buf, "base", data)
 	if err != nil {
 		app.serverError(w, err)
+		return
 	}
 
 	w.WriteHeader(status)
 
 	buf.WriteTo(w)
+}
+
+func (app *applicaiton) newTemplateData(r *http.Request) *templateData {
+	return &templateData{
+		CurrentYear: time.Now().Year(),
+	}
 }

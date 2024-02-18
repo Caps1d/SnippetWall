@@ -3,13 +3,25 @@ package main
 import (
 	"html/template"
 	"path/filepath"
+	"time"
 
 	"github.com/Caps1d/Lets-Go/internal/models"
 )
 
 type templateData struct {
-	Snippet  *models.Snippet
-	Snippets []*models.Snippet
+	CurrentYear int
+	Snippet     *models.Snippet
+	Snippets    []*models.Snippet
+}
+
+// custom template function to format date for readability
+func humanDate(t time.Time) string {
+	return t.Format("02 Jan 2006 at 15:45")
+}
+
+// add the custom func to FuncMap
+var functions = template.FuncMap{
+	"humanDate": humanDate,
 }
 
 func newTemplateCache() (map[string]*template.Template, error) { // Initialize a new map to act as the cache.
@@ -25,8 +37,9 @@ func newTemplateCache() (map[string]*template.Template, error) { // Initialize a
 		// Extract the file name (like 'home.tmpl') from the full filepath // and assign it to the name variable.
 		name := filepath.Base(page)
 
+		// First must register the FuncMap before assembling a template set
 		// Parse the files into a template set.
-		ts, err := template.ParseFiles("./ui/html/base.tmpl.html")
+		ts, err := template.New(name).Funcs(functions).ParseFiles("./ui/html/base.tmpl.html")
 		if err != nil {
 			return nil, err
 		}
