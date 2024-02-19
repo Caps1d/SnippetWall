@@ -5,7 +5,7 @@ import (
 	"path"
 )
 
-func (app *applicaiton) routes() *http.ServeMux {
+func (app *applicaiton) routes() http.Handler {
 	// servemux is a router
 	mux := http.NewServeMux()
 
@@ -17,5 +17,5 @@ func (app *applicaiton) routes() *http.ServeMux {
 	mux.HandleFunc("/snippet/view", app.snippetView)
 	mux.HandleFunc("/snippet/create", app.snippetCreate)
 
-	return mux
+	return secureHeaders(mux)
 }
