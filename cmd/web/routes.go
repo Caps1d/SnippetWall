@@ -1,25 +1,29 @@
 package main
 
 import (
-	"github.com/justinas/alice"
 	"net/http"
 	"path"
+
+	"github.com/julienschmidt/httprouter"
+	"github.com/justinas/alice"
 )
 
 func (app *applicaiton) routes() http.Handler {
 	// servemux is a router
-	mux := http.NewServeMux()
+	// mux := http.NewServeMux()
 
+	router := httprouter.New()
 	// app struct contains config with static dir path
 	fileServer := http.FileServer(http.Dir(path.Clean(app.cfg.StaticDir)))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet/view", app.snippetView)
-	mux.HandleFunc("/snippet/create", app.snippetCreate)
+	router.HandlerFunc(http.MethodGet, "/", app.home)
+	router.HandlerFunc(http.MethodGet, "/snippet/view/:id", app.snippetView)
+	router.HandlerFunc(http.MethodGet, "/snippet/create", app.snippetCreate)
+	router.HandlerFunc(http.MethodPost, "/snippet/create", app.snippetCreatePost)
 
 	// using justinas/alice package to manage middleware chains
 	standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 
-	return standard.Then(mux)
+	return standard.Then(router)
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/Caps1d/Lets-Go/internal/config"
 	"github.com/Caps1d/Lets-Go/internal/models"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/julienschmidt/httprouter"
 )
 
 // application struct for dependency injection
@@ -51,6 +52,8 @@ func main() {
 		errorLog:      errorLog,
 		templateCache: templateCache,
 	}
+
+	router := httprouter.New()
 
 	// initialize a new Server struct which containing our config
 	// this is how we hadle errors with errorLog
