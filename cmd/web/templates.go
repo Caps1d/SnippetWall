@@ -12,6 +12,7 @@ type templateData struct {
 	CurrentYear int
 	Snippet     *models.Snippet
 	Snippets    []*models.Snippet
+	Form        any
 }
 
 // custom template function to format date for readability
