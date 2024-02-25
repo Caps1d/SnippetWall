@@ -6,22 +6,26 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/Caps1d/Lets-Go/internal/config"
 	"github.com/Caps1d/Lets-Go/internal/models"
 
+	"github.com/alexedwards/scs/pgxstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // application struct for dependency injection
 type applicaiton struct {
-	cfg           *config.Config
-	snippets      *models.SnippetModel
-	infoLog       *log.Logger
-	errorLog      *log.Logger
-	templateCache map[string]*template.Template
-	formDecoder   *form.Decoder
+	cfg            *config.Config
+	snippets       *models.SnippetModel
+	infoLog        *log.Logger
+	errorLog       *log.Logger
+	templateCache  map[string]*template.Template
+	formDecoder    *form.Decoder
+	sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -48,14 +52,19 @@ func main() {
 
 	formDecoder := form.NewDecoder()
 
+	sessionManager := scs.New()
+	sessionManager.Store = pgxstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+
 	// app struct
 	app := &applicaiton{
-		cfg:           &cfg,
-		snippets:      &models.SnippetModel{DB: db},
-		infoLog:       infoLog,
-		errorLog:      errorLog,
-		templateCache: templateCache,
-		formDecoder:   formDecoder,
+		cfg:            &cfg,
+		snippets:       &models.SnippetModel{DB: db},
+		infoLog:        infoLog,
+		errorLog:       errorLog,
+		templateCache:  templateCache,
+		formDecoder:    formDecoder,
+		sessionManager: sessionManager,
 	}
 
 	// initialize a new Server struct which containing our config
