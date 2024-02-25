@@ -73,7 +73,7 @@ func (app *applicaiton) decodePostForm(r *http.Request, dst any) error {
 	if err != nil {
 		var invalidDecoderError *form.InvalidDecoderError
 
-		if errors.As(err, &invalidDecoderError) {
+		if errors.As(err, invalidDecoderError) {
 			panic(err)
 		}
 

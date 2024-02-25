@@ -52,8 +52,11 @@ func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	flash := app.sessionManager.PopString(r.Context(), "flash")
+
 	data := app.newTemplateData(r)
 	data.Snippet = s
+	data.Flash = flash
 
 	app.render(w, http.StatusOK, "view.tmpl.html", data)
 
@@ -71,8 +74,8 @@ func (app *applicaiton) snippetCreate(w http.ResponseWriter, r *http.Request) {
 // using struct tags to tell the decode how to map html form values into struct fields
 // `form:"-"` tells the decoder to ignore the field
 type snippetCreateForm struct {
-	Title               string `form: "title"`
-	Content             string `form: "content"`
+	Title               string `form:"title"`
+	Content             string `form:"content"`
 	Expires             int    `form:"expires"`
 	validator.Validator `form:"-"`
 }
@@ -104,6 +107,8 @@ func (app *applicaiton) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		app.serverError(w, err)
 		return
 	}
+
+	app.sessionManager.Put(r.Context(), "flash", "Snippet succesfully created!")
 
 	app.infoLog.Printf("New snippet created with id %d", id)
 
