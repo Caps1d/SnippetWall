@@ -9,6 +9,8 @@ import (
 
 	"github.com/Caps1d/Lets-Go/internal/config"
 	"github.com/Caps1d/Lets-Go/internal/models"
+
+	"github.com/go-playground/form/v4"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -19,6 +21,7 @@ type applicaiton struct {
 	infoLog       *log.Logger
 	errorLog      *log.Logger
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -43,6 +46,8 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	formDecoder := form.NewDecoder()
+
 	// app struct
 	app := &applicaiton{
 		cfg:           &cfg,
@@ -50,6 +55,7 @@ func main() {
 		infoLog:       infoLog,
 		errorLog:      errorLog,
 		templateCache: templateCache,
+		formDecoder:   formDecoder,
 	}
 
 	// initialize a new Server struct which containing our config
