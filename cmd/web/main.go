@@ -71,9 +71,13 @@ func main() {
 	// initialize a new Server struct which containing our config
 	// this is how we hadle errors with errorLog
 	srv := &http.Server{
-		Addr:     cfg.Addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(),
+		Addr:         cfg.Addr,
+		ErrorLog:     errorLog,
+		Handler:      app.routes(),
+		TLSConfig:    cfg.TLS,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	infoLog.Printf("Starting servern on %v", cfg.Addr)

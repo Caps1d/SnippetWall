@@ -1,11 +1,15 @@
 package config
 
-import "flag"
+import (
+	"crypto/tls"
+	"flag"
+)
 
 type Config struct {
 	Addr      string
 	DBUrl     string
 	StaticDir string
+	TLS       *tls.Config
 }
 
 func NewConfig() Config {
@@ -17,6 +21,10 @@ func NewConfig() Config {
 	flag.StringVar(&cfg.DBUrl, "db", "postgres://web:test@localhost:5432/snippetbox", "DataBase URL")
 
 	flag.Parse()
+
+	cfg.TLS = &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
 
 	return cfg
 }
