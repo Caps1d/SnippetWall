@@ -12,7 +12,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (app *applicaiton) home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	app.infoLog.Println("Home endpoint reached")
 
 	snippets, err := app.snippets.Latest()
@@ -28,7 +28,7 @@ func (app *applicaiton) home(w http.ResponseWriter, r *http.Request) {
 	app.render(w, http.StatusOK, "home.tmpl.html", data)
 }
 
-func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	// getting Clean URL parameters from request context
 	// we also want to make sure that the id is an int
 	// we parse the str and convert it to an int
@@ -60,7 +60,7 @@ func (app *applicaiton) snippetView(w http.ResponseWriter, r *http.Request) {
 	app.infoLog.Printf("Displaying snippet with ID %d...", id)
 }
 
-func (app *applicaiton) snippetCreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Form = snippetCreateForm{
 		Expires: 365,
@@ -77,7 +77,7 @@ type snippetCreateForm struct {
 	validator.Validator `form:"-"`
 }
 
-func (app *applicaiton) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
 	var form snippetCreateForm
 
 	err := app.decodePostForm(r, &form)
@@ -110,4 +110,54 @@ func (app *applicaiton) snippetCreatePost(w http.ResponseWriter, r *http.Request
 	app.infoLog.Printf("New snippet created with id %d", id)
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
+}
+
+type userSignupForm struct {
+	Name     string `form:"name"`
+	Email    string `form:"email"`
+	Password string `form:"password"`
+	validator.Validator
+}
+
+func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = userSignupForm{}
+	app.render(w, http.StatusOK, "signup.tmpl.html", data)
+}
+
+func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
+	var form *userSignupForm
+
+	err := app.decodePostForm(r, &form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.CheckField(validator.NotBlank(form.Name), "name", "This field must not be empty.")
+	form.CheckField(validator.NotBlank(form.Email), "email", "This field must not be empty.")
+	form.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "This field must be a valid email addresd")
+	form.CheckField(validator.NotBlank(form.Password), "password", "This field must not be empty.")
+	form.CheckField(validator.MinChars(form.Password), "password", "This field must be at least 8 characters long")
+
+	if !form.Valid() {
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, http.StatusUnprocessableEntity, "signup.tmpl.html", data)
+		return
+	}
+
+	fmt.Fprintln(w, "Create a new user...")
+}
+
+func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Authenticate and login the user...")
+}
+
+func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Authenticate and login the user...")
+}
+
+func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Logout the user...")
 }

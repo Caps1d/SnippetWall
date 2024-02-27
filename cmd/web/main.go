@@ -18,9 +18,10 @@ import (
 )
 
 // application struct for dependency injection
-type applicaiton struct {
+type application struct {
 	cfg            *config.Config
 	snippets       *models.SnippetModel
+	users          *models.UserModel
 	infoLog        *log.Logger
 	errorLog       *log.Logger
 	templateCache  map[string]*template.Template
@@ -58,9 +59,10 @@ func main() {
 	sessionManager.Cookie.Secure = true
 
 	// app struct
-	app := &applicaiton{
+	app := &application{
 		cfg:            &cfg,
 		snippets:       &models.SnippetModel{DB: db},
+		users:          &models.UserModel{DB: db},
 		infoLog:        infoLog,
 		errorLog:       errorLog,
 		templateCache:  templateCache,

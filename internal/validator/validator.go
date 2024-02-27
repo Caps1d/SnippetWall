@@ -1,9 +1,16 @@
 package validator
 
 import (
+	"regexp"
 	"strings"
 	"unicode/utf8"
 )
+
+// returns a pointer to a 'compiled' regexp.Regexp type
+// this way the pattern gets compiled into an optimized format once
+// avoiding the need of parsing it every time we validate an email
+// used for email sanity checking
+var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 // Validator type which contains a map of validation errors
 // for our form fields
@@ -29,6 +36,14 @@ func (v *Validator) CheckField(ok bool, key, message string) {
 	if !ok {
 		v.AddFieldErrors(key, message)
 	}
+}
+
+func Matches(value string, rx *regexp.Regexp) bool {
+	return rx.MatchString(value)
+}
+
+func MinChars(value string) bool {
+	return utf8.RuneCountInString(value) >= 8
 }
 
 func NotBlank(value string) bool {

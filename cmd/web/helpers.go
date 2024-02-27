@@ -11,7 +11,7 @@ import (
 	"github.com/go-playground/form/v4"
 )
 
-func (app *applicaiton) serverError(w http.ResponseWriter, err error) {
+func (app *application) serverError(w http.ResponseWriter, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 	// shows where the error originated from by setting the frame depth to 2
 	app.errorLog.Output(2, trace)
@@ -19,15 +19,15 @@ func (app *applicaiton) serverError(w http.ResponseWriter, err error) {
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 
-func (app *applicaiton) clientError(w http.ResponseWriter, status int) {
+func (app *application) clientError(w http.ResponseWriter, status int) {
 	http.Error(w, http.StatusText(status), status)
 }
 
-func (app *applicaiton) notFound(w http.ResponseWriter) {
+func (app *application) notFound(w http.ResponseWriter) {
 	app.clientError(w, http.StatusNotFound)
 }
 
-func (app *applicaiton) render(w http.ResponseWriter, status int, page string, data *templateData) {
+func (app *application) render(w http.ResponseWriter, status int, page string, data *templateData) {
 	// Retrieve the appropriate template set from the cache based on the page
 	// name (like 'home.tmpl'). If no entry exists in the cache with the
 	// provided name, then create a new error and call the serverError() helper
@@ -57,14 +57,14 @@ func (app *applicaiton) render(w http.ResponseWriter, status int, page string, d
 	buf.WriteTo(w)
 }
 
-func (app *applicaiton) newTemplateData(r *http.Request) *templateData {
+func (app *application) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
 		CurrentYear: time.Now().Year(),
 		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
 	}
 }
 
-func (app *applicaiton) decodePostForm(r *http.Request, dst any) error {
+func (app *application) decodePostForm(r *http.Request, dst any) error {
 	err := r.ParseForm()
 	if err != nil {
 		return err
