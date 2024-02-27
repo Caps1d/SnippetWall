@@ -42,8 +42,8 @@ func Matches(value string, rx *regexp.Regexp) bool {
 	return rx.MatchString(value)
 }
 
-func MinChars(value string) bool {
-	return utf8.RuneCountInString(value) >= 8
+func MinChars(value string, num int) bool {
+	return utf8.RuneCountInString(value) >= num
 }
 
 func NotBlank(value string) bool {
