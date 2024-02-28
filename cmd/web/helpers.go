@@ -28,10 +28,6 @@ func (app *application) notFound(w http.ResponseWriter) {
 }
 
 func (app *application) render(w http.ResponseWriter, status int, page string, data *templateData) {
-	// Retrieve the appropriate template set from the cache based on the page
-	// name (like 'home.tmpl'). If no entry exists in the cache with the
-	// provided name, then create a new error and call the serverError() helper
-	// method that we made earlier and return.
 	ts, ok := app.templateCache[page]
 	if !ok {
 		err := fmt.Errorf("the template %s does not exist", page)
@@ -41,8 +37,8 @@ func (app *application) render(w http.ResponseWriter, status int, page string, d
 
 	buf := new(bytes.Buffer)
 
-	// Write out the provided HTTP status code ('200 OK', '400 Bad Request', etc)
 	// w.WriteHeader(status)
+	// Write out the provided HTTP status code ('200 OK', '400 Bad Request', etc)
 	// Execute the template set and write the response body. Again, if there
 	// is any error we call the the serverError() helper
 	// err := ts.ExecuteTemplate(w, "base", data) if err != nil {
@@ -59,8 +55,9 @@ func (app *application) render(w http.ResponseWriter, status int, page string, d
 
 func (app *application) newTemplateData(r *http.Request) *templateData {
 	return &templateData{
-		CurrentYear: time.Now().Year(),
-		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
+		CurrentYear:     time.Now().Year(),
+		Flash:           app.sessionManager.PopString(r.Context(), "flash"),
+		IsAuthenticated: app.isAuthenticated(r),
 	}
 }
 
@@ -84,3 +81,6 @@ func (app *application) decodePostForm(r *http.Request, dst any) error {
 	return nil
 }
 
+func (app *application) isAuthenticated(r *http.Request) bool {
+	return app.sessionManager.Exists(r.Context(), "authenticatedUserID")
+}
