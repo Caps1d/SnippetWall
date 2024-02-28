@@ -2,10 +2,10 @@ package models
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -41,7 +41,7 @@ func (m *SnippetModel) Get(id int) (*Snippet, error) {
 
 	err := m.DB.QueryRow(context.Background(), query, id).Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
 
-	if errors.Is(err, sql.ErrNoRows) || s.ID != id {
+	if errors.Is(err, pgx.ErrNoRows) || s.ID != id {
 		// return our custom error
 		return nil, ErrNoRecord
 	}

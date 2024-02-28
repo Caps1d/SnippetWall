@@ -3,13 +3,13 @@ package models
 import (
 	"context"
 	"errors"
-	"strconv"
-	"strings"
-	"time"
-
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type User struct {
@@ -49,9 +49,34 @@ func (m *UserModel) Insert(name, email, password string) error {
 	return err
 }
 
-func (m *UserModel) Authenticate(name, email, password string) (int, error) {
-	return 0, nil
+func (m *UserModel) Authenticate(email, password string) (int, error) {
+	var id int
+	var hashedPassword []byte
+
+	query := `
+            SELECT id, hashed_password FROM users WHERE email = $1;
+  `
+	err := m.DB.QueryRow(context.Background(), query, email).Scan(&id, &hashedPassword)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+
+	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return 0, ErrInvalidCredentials
+		} else {
+			return 0, err
+		}
+	}
+
+	return id, nil
 }
+
 func (m *UserModel) Exists(id int) (bool, error) {
 	return false, nil
 }
