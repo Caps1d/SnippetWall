@@ -1,8 +1,9 @@
 {{define "title"}}Login{{end}}
 {{define "main"}}
 <form action='/user/login' method='POST' novalidate>
-  {{range .Form.NonFieldErrors}}
-  <div class='error'>{{.}}</div> {{end}}
+  <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+  {{range .Form.NonFieldErrors}} <div class='error'>{{.}}
+  </div> {{end}}
   <div>
     <label>Email:</label>
     {{with .Form.FieldErrors.email}}
