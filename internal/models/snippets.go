@@ -17,17 +17,23 @@ type Snippet struct {
 	Expires time.Time
 }
 
+type SnippetModelInterface interface {
+	Insert(title string, content string, expires int) (int, error)
+	Get(id int) (*Snippet, error)
+	Latest() ([]*Snippet, error)
+}
+
 type SnippetModel struct {
 	DB *pgxpool.Pool
 }
 
-func (m *SnippetModel) Insert(title string, content string, expires int) (int64, error) {
+func (m *SnippetModel) Insert(title string, content string, expires int) (int, error) {
 	query := `
             INSERT INTO snippets (title, content, created, expires)
             VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '1' day * $3)
             RETURNING id;`
 
-	var id int64
+	var id int
 	err := m.DB.QueryRow(context.Background(), query, title, content, expires).Scan(&id)
 	return id, err
 }
@@ -35,7 +41,7 @@ func (m *SnippetModel) Insert(title string, content string, expires int) (int64,
 func (m *SnippetModel) Get(id int) (*Snippet, error) {
 	var s Snippet
 	query := `
-            SELECT id, title, content, created, expires 
+            SELECT id, title, content, created, expires
             FROM snippets
             WHERE id = $1 AND expires > CURRENT_TIMESTAMP;`
 
@@ -53,7 +59,7 @@ func (m *SnippetModel) Get(id int) (*Snippet, error) {
 func (m *SnippetModel) Latest() ([]*Snippet, error) {
 
 	query := `
-            SELECT * 
+            SELECT *
             FROM snippets
             WHERE expires > CURRENT_TIMESTAMP
             ORDER BY id DESC LIMIT 10;

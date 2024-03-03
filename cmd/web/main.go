@@ -20,8 +20,8 @@ import (
 // application struct for dependency injection
 type application struct {
 	cfg            *config.Config
-	snippets       *models.SnippetModel
-	users          *models.UserModel
+	snippets       models.SnippetModelInterface
+	users          models.UserModelInterface
 	infoLog        *log.Logger
 	errorLog       *log.Logger
 	templateCache  map[string]*template.Template

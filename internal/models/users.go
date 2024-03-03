@@ -19,7 +19,11 @@ type User struct {
 	HashedPassword []byte
 	Created        time.Time
 }
-
+type UserModelInterface interface {
+	Insert(name, email, password string) error
+	Authenticate(email, password string) (int, error)
+	Exists(id int) (bool, error)
+}
 type UserModel struct {
 	DB *pgxpool.Pool
 }
