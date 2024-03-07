@@ -15,10 +15,12 @@ type Config struct {
 func NewConfig() Config {
 	var cfg Config
 
+	fs := flag.NewFlagSet("config", flag.ExitOnError)
+
 	// app
-	flag.StringVar(&cfg.Addr, "addr", ":3000", "HTTP network address")
-	flag.StringVar(&cfg.StaticDir, "static-dir", "./ui/static", "Path to static assets")
-	flag.StringVar(&cfg.DBUrl, "db", "postgres://web:test@localhost:5432/snippetbox", "DataBase URL")
+	fs.StringVar(&cfg.Addr, "addr", ":3000", "HTTP network address")
+	fs.StringVar(&cfg.StaticDir, "static-dir", "./ui/static", "Path to static assets")
+	fs.StringVar(&cfg.DBUrl, "db", "postgres://web:test@localhost:5432/snippetbox", "DataBase URL")
 
 	flag.Parse()
 
