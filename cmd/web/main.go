@@ -78,8 +78,7 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	infoLog.Printf("Starting servern on %v", cfg.Addr)
-	// err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	infoLog.Printf("Starting server on %v", cfg.Addr)
 	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
