@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Caps1d/Lets-Go/internal/models/mocks"
+	"github.com/Caps1d/snippetWall/internal/models/mocks"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 )

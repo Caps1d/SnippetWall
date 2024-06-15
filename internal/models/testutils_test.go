@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Caps1d/Lets-Go/internal/config"
+	"github.com/Caps1d/snippetWall/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

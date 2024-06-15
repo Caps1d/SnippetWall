@@ -1,4 +1,4 @@
-module github.com/Caps1d/Lets-Go
+module github.com/Caps1d/snippetWall
 
 go 1.21.5
 

@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/Caps1d/Lets-Go/ui"
+	"github.com/Caps1d/snippetWall/ui"
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
 )

@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Caps1d/Lets-Go/internal/assert"
+	"github.com/Caps1d/snippetWall/internal/assert"
 )
 
 func TestSecureHeaders(t *testing.T) {

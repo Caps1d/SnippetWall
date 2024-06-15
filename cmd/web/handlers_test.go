@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/Caps1d/Lets-Go/internal/assert"
+	"github.com/Caps1d/snippetWall/internal/assert"
 )
 
 func TestPing(t *testing.T) {

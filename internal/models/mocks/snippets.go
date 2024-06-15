@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	"github.com/Caps1d/Lets-Go/internal/models"
+	"github.com/Caps1d/snippetWall/internal/models"
 	"time"
 )
 

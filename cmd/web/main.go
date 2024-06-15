@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/Caps1d/Lets-Go/internal/config"
-	"github.com/Caps1d/Lets-Go/internal/models"
+	"github.com/Caps1d/snippetWall/internal/config"
+	"github.com/Caps1d/snippetWall/internal/models"
 
 	"github.com/alexedwards/scs/pgxstore"
 	"github.com/alexedwards/scs/v2"
@@ -30,9 +30,6 @@ type application struct {
 }
 
 func main() {
-	// add command line flags
-	// addr := flag.String("addr", ":4000", "HTTP network address")
-	// below I am storing the flag values in a config struct for convenience
 	cfg := config.NewConfig()
 
 	// levelled logging
@@ -76,14 +73,14 @@ func main() {
 		Addr:         cfg.Addr,
 		ErrorLog:     errorLog,
 		Handler:      app.routes(),
-		TLSConfig:    cfg.TLS,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
 	infoLog.Printf("Starting servern on %v", cfg.Addr)
-	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	// err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
 }
 

@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Caps1d/Lets-Go/internal/models"
-	"github.com/Caps1d/Lets-Go/internal/validator"
+	"github.com/Caps1d/snippetWall/internal/models"
+	"github.com/Caps1d/snippetWall/internal/validator"
 	"github.com/julienschmidt/httprouter"
 )
 

@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/Caps1d/Lets-Go/internal/models"
-	"github.com/Caps1d/Lets-Go/ui"
+	"github.com/Caps1d/snippetWall/internal/models"
+	"github.com/Caps1d/snippetWall/ui"
 )
 
 type templateData struct {
