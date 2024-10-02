@@ -7,6 +7,12 @@ CREATE TABLE snippets (
     expires TIMESTAMPTZ NOT NULL
 );
 
+CREATE TABLE sessions (
+    token TEXT PRIMARY KEY,
+    data BYTEA NOT NULL,
+    expiry TIMESTAMPTZ NOT NULL
+);
+
 -- Create index on snippets.created
 CREATE INDEX idx_snippets_created ON snippets(created);
 

@@ -1,0 +1,30 @@
+# Build stage
+FROM golang:1.23.2 AS builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+
+RUN go mod download
+
+COPY cmd/ cmd/
+COPY internal/ internal/
+COPY ui/ ui/
+
+
+RUN CGO_ENABLED=0 go build -o /app/snippetWall ./cmd/web/
+
+# Final Stage
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /app/
+
+COPY --from=builder /app/snippetWall .
+
+COPY --from=builder /app/ui ./ui
+
+EXPOSE 8080
+
+CMD [ "./snippetWall" ]
