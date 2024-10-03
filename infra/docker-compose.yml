@@ -1,39 +1,48 @@
 services:
-  reverse-proxy:
-    image: caddy:2.8.4-alpine
-    restart: unless-stopped
-    cap_add:
-      - NET_ADMIN
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    command:
+      - "--accesslog=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=hello@yesme.dev"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "letsencrypt:/letsencrypt"
   app:
-    image: ghcr.io/Caps1d/snippetwall-app:latest
+    image: ghcr.io/caps1d/snippetwall:latest
     expose:
       - "8080"
     depends_on:
         db:
             condition: service_healthy
+    restart: on-failure
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.shelf-web.entrypoints=websecure"
+      - "traefik.http.routers.shelf-web.rule=Host(`wall.yesme.dev`)"
+      - "traefik.http.routers.shelf-web.tls.certresolver=myresolver"
+
+  db:
+    image: postgres:17
     healthcheck:
         test: ["CMD-SHELL", "pg_isready -d snippetwall -U postgres"]
         interval: 10s
         timeout: 5s
         retries: 5
-    restart: on-failure
-
-  db:
-    image: postgres:17
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d snippetwall -U postgres"]
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./internal/models/testdata/setup.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=test
@@ -43,6 +52,5 @@ services:
 
 volumes:
   postgres_data:
-  caddy_data:
-  caddy_config:
+  letsencrypt:
 

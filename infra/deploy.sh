@@ -18,6 +18,9 @@ ssh -i ~/.ssh/keys/keypairEC2.pem $SSH_USER@$SSH_HOST "mkdir -p $WORK_DIR"
 ssh -i ~/.ssh/keys/keypairEC2.pem $SSH_USER@$SSH_HOST "echo $PAT | docker login ghcr.io -u Caps1d --password-stdin"
 
 rsync -avzP -e "ssh -i ~/.ssh/keys/keypairEC2.pem" ./docker-compose.yml $SSH_USER@$SSH_HOST:$WORK_DIR
+rsync -avzP -e "ssh -i ~/.ssh/keys/keypairEC2.pem" ../Caddyfile $SSH_USER@$SSH_HOST:$WORK_DIR
+rsync -avzP -e "ssh -i ~/.ssh/keys/keypairEC2.pem" ../internal/models/testdata/setup.sql $SSH_USER@$SSH_HOST:$WORK_DIR
+
 
 ssh -i ~/.ssh/keys/keypairEC2.pem $SSH_USER@$SSH_HOST "cd $WORK_DIR && docker compose up -d"
 

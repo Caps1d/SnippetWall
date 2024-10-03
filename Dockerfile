@@ -12,7 +12,7 @@ COPY internal/ internal/
 COPY ui/ ui/
 
 
-RUN CGO_ENABLED=0 go build -o /app/snippetWall ./cmd/web/
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/snippetWall ./cmd/web/
 
 # Final Stage
 FROM alpine:latest

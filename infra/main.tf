@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.49.0"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
   }
   required_version = ">= 1.2.0"
 }
@@ -15,6 +19,21 @@ provider "aws" {
 data "aws_vpc" "default" {
   default = true
 }
+
+variable "cloudflare_token" {
+  type      = string
+  sensitive = true
+}
+
+variable "cloudflare_zone_id" {
+  type      = string
+  sensitive = true
+}
+
+provider "cloudflare" {
+  api_token = var.cloudflare_token
+}
+
 
 resource "aws_security_group" "web_server_sg_tf" {
   name        = "web-server-sg-tf"
@@ -83,4 +102,14 @@ resource "aws_instance" "app_server" {
     volume_size           = "8"
     delete_on_termination = true
   }
+}
+
+
+resource "cloudflare_record" "app" {
+  zone_id = var.cloudflare_zone_id
+  name    = "wall"
+  content = aws_instance.app_server.public_ip
+  type    = "A"
+  proxied = false
+  comment = "snippetwall app"
 }

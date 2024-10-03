@@ -1,3 +1,4 @@
 snippetwall.yesme.dev {
-    reverse_proxy :8080
+    tls internal
+    reverse_proxy http://app:8080
 }
