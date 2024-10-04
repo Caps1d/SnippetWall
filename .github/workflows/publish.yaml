@@ -24,7 +24,7 @@ jobs:
       - name: Build and Push App Image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ..
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.ACTOR }}/snippetwall-app:latest
           cache-from: type=gha
