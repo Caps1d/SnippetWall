@@ -5,7 +5,7 @@ on:
       - main
 env:
   REGISTRY: ghcr.io
-  ACTOR: ${{ github.actor }}
+  ACTOR: caps1d
 jobs:
   publish:
     name: publish images
