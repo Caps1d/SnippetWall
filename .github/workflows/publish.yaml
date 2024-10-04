@@ -54,11 +54,18 @@ jobs:
         run: chmod 600 ~/.ssh/id_rsa
 
       - name: Connect and Deploy
-        run: ssh -v ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd ${{ secrets.WORK_DIR }} &&\
-                 docker login ${{ env.REGISTRY }} -u ${{ env.ACTOR }} -p ${{ secrets.PAT }} && \
-                 docker compose pull &&\
-                 docker compose up -d &&\
-                 exit"
+        run: |
+         ssh -v ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          echo 'Current directory:' && pwd &&
+          echo 'PATH:' && echo \$PATH &&
+          echo 'Which docker:' && which docker &&
+          echo 'Docker version:' && docker --version &&
+          cd ${{ secrets.WORK_DIR }} &&
+          echo 'Current directory after cd:' && pwd &&
+          docker login ${{ env.REGISTRY }} -u ${{ env.ACTOR }} -p ${{ secrets.PAT }} &&
+          docker compose pull &&
+          docker compose up -d &&
+          exit"
 
       - name: Cleanup
         run: rm -rf ~/.ssh
