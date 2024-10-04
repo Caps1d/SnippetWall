@@ -21,6 +21,11 @@ jobs:
           username: ${{ env.ACTOR }}
           password: ${{ secrets.PAT }}
 
+      - name: Check working directory
+        run: |
+         pwd
+         ls -la
+
       - name: Build and Push App Image
         uses: docker/build-push-action@v6
         with:
