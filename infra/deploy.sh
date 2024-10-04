@@ -18,14 +18,25 @@ ssh -i ~/.ssh/keys/keypairEC2.pem $SSH_USER@$SSH_HOST "mkdir -p $WORK_DIR"
 ssh -i ~/.ssh/keys/keypairEC2.pem $SSH_USER@$SSH_HOST "echo $PAT | docker login ghcr.io -u Caps1d --password-stdin"
 
 rsync -avzP -e "ssh -i ~/.ssh/keys/keypairEC2.pem" ./docker-compose.yml $SSH_USER@$SSH_HOST:$WORK_DIR
-rsync -avzP -e "ssh -i ~/.ssh/keys/keypairEC2.pem" ../Caddyfile $SSH_USER@$SSH_HOST:$WORK_DIR
 rsync -avzP -e "ssh -i ~/.ssh/keys/keypairEC2.pem" ../internal/models/testdata/setup.sql $SSH_USER@$SSH_HOST:$WORK_DIR
 
 
 ssh -i ~/.ssh/keys/keypairEC2.pem $SSH_USER@$SSH_HOST "cd $WORK_DIR && docker compose up -d"
 
 ssh-keygen -t rsa -b 4096 -f ./ssh_key -N ""
-ssh-copy-id -i ./ssh_key.pub $SSH_USER@$SSH_HOST
+cat ./ssh_key.pub | ssh -i ~/.ssh/keys/keypairEC2.pem $SSH_USER@$SSH_HOST "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+# ssh-copy-id -i ./ssh_key.pub $SSH_USER@$SSH_HOST
+
+echo "Testing connection with new key..."
+ssh -i ./ssh_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "echo 'Connection successful'"
+
+if [ $? -eq 0 ]; then
+  echo "SSH connection test successful. Setting up GitHub secrets..."
+  # Proceed with setting GitHub secrets
+else
+  echo "SSH connection test failed. Check key installation and server configuration."
+  exit 1
+fi
 
 SSH_PRIVATE_KEY=$(cat ./ssh_key)
 
