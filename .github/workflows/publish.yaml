@@ -30,15 +30,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push Caddy image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile.caddy  # You'll need to create this
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.ACTOR }}/snippetwall-caddy:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   deploy:
     needs: publish
